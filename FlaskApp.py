@@ -1,9 +1,5 @@
-import json
 import State as pst
-from random import shuffle
-import os
-import time
-
+import socket
 from flask import Flask, render_template, request, jsonify
 
 app = Flask("Sliding Puzzle")
@@ -30,4 +26,6 @@ def solve():
 
 
 if __name__ == "__main__":
+    # hoster = socket.gethostbyname(socket.gethostname())
+    # app.run(host=hoster)
     app.run()
