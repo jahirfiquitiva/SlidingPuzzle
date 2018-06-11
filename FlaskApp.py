@@ -1,5 +1,5 @@
 import json
-from puzzle import State as pst
+import State as pst
 from random import shuffle
 import os
 import time

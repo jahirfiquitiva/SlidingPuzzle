@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import messagebox as mb
 from random import shuffle
-from puzzle import State as pst
+import State as pst
 from time import sleep, time
 
 global_user_moves = 0
@@ -109,7 +109,8 @@ class Board():
             else:
                 if global_pc_moves < 0:
                     winner = "You are"
-                mb.showinfo(title, "In %.3f seconds and %d movements.\n%s the winner" % (right_time, self.moves, winner))
+                mb.showinfo(title, "In %.3f seconds and %d movements.\n%s the winner" % (
+                right_time, self.moves, winner))
         else:
             if self.is_pc:
                 mb.showinfo("Error", "The PC could not solve the puzzle. Can you?")
