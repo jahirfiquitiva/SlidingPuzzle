@@ -1,0 +1,100 @@
+html, body {
+    font-family: 'Rubik', sans-serif;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    min-height: 100%;
+    max-height: 100%;
+    background: #FCFCFC;
+}
+
+a {
+    color: #4285F4;
+}
+
+.puzzle-base {
+    height: 100%;
+    width: 100%;
+}
+
+.puzzle-parent {
+    display: table;
+    margin: auto;
+}
+
+.puzzle-container {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.puzzle {
+    text-align: center;
+}
+
+.puzzle-title {
+    text-align: center;
+    margin: auto;
+}
+
+.piece {
+    height: 4rem;
+    width: 4rem;
+    border: 1px solid #000;
+    text-align: center;
+    cursor: default;
+    font-size: 2rem;
+}
+
+.no-select {
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none;
+    /* Non-prefixed version, currently
+                                     supported by Chrome and Opera */
+}
+
+.puzzle {
+    border-spacing: 0 !important;
+    border-collapse: collapse !important;
+    margin: auto;
+}
+
+.keyboard,
+.btns {
+    margin: auto;
+    text-align: center;
+    border-spacing: 0.4rem !important;
+}
+
+.kbd-key {
+    height: 4rem;
+    width: 4rem;
+    text-align: center;
+    background: #000;
+    color: #fff;
+    cursor: pointer;
+    font-size: 2rem;
+    border-radius: 4px;
+    text-shadow: 0 1px 4px #fff;
+}
+
+button {
+    background: #4285F4;
+    color: #FFF;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 4px;
+    padding: 0.48rem;
+    margin: 0.16rem;
+    cursor: pointer;
+}
+
+button:disabled,
+.disabled-key {
+    background: #ccc;
+    cursor: default;
+    pointer-events: none;
+}

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Sliding Puzzle | Jahir Fiquitiva</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link href="../static/main.css" rel="stylesheet"/>
+        <link href="https://fonts.googleapis.com/css?family=Rubik" rel="stylesheet">
+    </head>
+    <body scroll="no">
+
+        <div class="puzzle-parent puzzle-base">
+            <div class="puzzle-container puzzle-base">
+                <h1 class="puzzle-title">Sliding Puzzle 🔢</h1>
+
+                <br><br>
+
+                <table class="puzzle" id="user-puzzle"></table>
+
+                <br><br>
+
+                <table class="keyboard">
+                    <tr>
+                        <td></td>
+                        <td class="kbd-key" onclick="move('up');">↑</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="kbd-key" onclick="move('le');">←</td>
+                        <td class="kbd-key" onclick="move('do');">↓</td>
+                        <td class="kbd-key" onclick="move('ri');">→</td>
+                    </tr>
+                </table>
+
+                <br>
+
+                <p id="wait-txt" style="text-align: center; margin:auto; display: none;">
+                    Please wait…
+                </p>
+
+                <br>
+
+                <div class="btns">
+                    <button onclick="restart();">Restart</button>
+                    <button onclick="new_game();">New</button>
+                    <button onclick="solve_by_pc();">Solve</button>
+                </div>
+
+                <br><br>
+
+                <p style="text-align: center; margin:auto;">
+                    Made by <a href="/">Jahir Fiquitiva</a>
+                </p>
+
+            </div>
+        </div>
+
+        <script src="https://rawgithub.com/mziccard/node-timsort/master/build/timsort.js"></script>
+        <script src="../static/utils.js" lang="text/javascript"></script>
+        <script src="../static/puzzle.js" lang="text/javascript"></script>
+    </body>
+</html>
