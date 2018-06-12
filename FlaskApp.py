@@ -13,7 +13,7 @@ def get_solution_from_file(expected, file):
         lines = [line.rstrip('\n') for line in file]
         for line in lines:
             if line.startswith(expected):
-                print('Already in file')
+                print('Found solution!')
                 solution = [char for char in line.split("=")[1]]
                 break
     except Exception:
@@ -26,11 +26,11 @@ def get_solution_from_file(expected, file):
 def save_solution_in_file(state, path, file):
     try:
         solution = ''.join(str(n) for n in path)
-        print("Saving in file")
-        print(state + "=" + solution)
+        print("Saving solution in file: " + state + "=" + solution)
         file.write(state + "=" + solution + "\n")
+        return True
     except Exception:
-        pass
+        return False
 
 
 @app.route("/")
@@ -73,7 +73,38 @@ def solve():
         return jsonify(moves=-1, time=-1, path=[], steps=[])
 
 
+# noinspection PyBroadException
+@app.route('/save', methods=['POST'])
+def save():
+    try:
+        state_string = str(request.args.get('initial_state')) \
+            .replace('[', '').replace(']', '').replace("'", '')
+
+        steps_arg = str(request.args.get('steps')) \
+            .replace('[', '').replace(']', '').replace("'", '')
+        steps = []
+        for char in steps_arg:
+            steps.append(str(char))
+
+        try:
+            file = open(SOLUTION_FILE, 'r')
+        except IOError:
+            file = open(SOLUTION_FILE, 'w')
+        file = open(SOLUTION_FILE, 'r')
+
+        solution = get_solution_from_file(state_string, file)
+
+        saved = False
+        if solution is None or len(solution) <= 0 or len(steps) < len(solution):
+            file = open(SOLUTION_FILE, 'a')
+            saved = save_solution_in_file(state_string, steps, file)
+
+        return jsonify(success=saved)
+    except Exception:
+        return jsonify(success=False)
+
+
 if __name__ == "__main__":
-    hoster = socket.gethostbyname(socket.gethostname())
-    app.run(host=hoster)
-    # app.run()
+    # hoster = socket.gethostbyname(socket.gethostname())
+    # app.run(host=hoster)
+    app.run()

@@ -16,6 +16,7 @@ let bot_solved = false;
 const target = [1, 2, 3, 4, 5, 6, 7, 8, 0];
 let initial_state = [4, 1, 3, 0, 5, 7, 6, 2, 8]; // shuffle([1, 2, 3, 4, 5, 6, 7, 8, 0]);
 let user_state = clone(initial_state);
+let user_steps = [];
 let bot_state = clone(initial_state);
 
 let update_user_results = function () {
@@ -52,13 +53,9 @@ function update_winner() {
 function new_game() {
     enable_ui(false);
     initial_state = [4, 1, 3, 0, 5, 7, 6, 2, 8]; // shuffle([1, 2, 3, 4, 5, 6, 7, 8, 0]);
-    game_started = false;
-    game_finished = false;
     moves = 0;
     initial_time = 0;
-    end_time = 0;
     solving = false;
-    user_solved = false;
     bot_solved = false;
     bot_path = [];
     bot_moves = -1;
@@ -71,6 +68,11 @@ function new_game() {
 }
 
 function restart() {
+    game_started = false;
+    end_time = 0;
+    user_solved = false;
+    user_steps = [];
+    game_finished = false;
     user_state = clone(initial_state);
     init_puzzle(user_state);
 }
@@ -209,6 +211,24 @@ function move(direction, isUser) {
     }
 
     if (moved && !solving && isUser) {
+        let right_step = '';
+        switch (direction) {
+            case 'up':
+                right_step = 'w';
+                break;
+            case 'do':
+                right_step = 's';
+                break;
+            case 'le':
+                right_step = 'a';
+                break;
+            case 'ri':
+                right_step = 'd';
+                break;
+        }
+        if (right_step.length > 0) {
+            user_steps.push(right_step);
+        }
         moves += 1;
         if (!game_started && !game_finished) {
             game_started = true;
@@ -236,6 +256,7 @@ function move(direction, isUser) {
         if (isUser) {
             user_solved = true;
             update_user_results();
+            post_solution();
         } else {
             bot_solved = true;
             update_bot_results();
@@ -384,4 +405,31 @@ function move_by_pc(sol) {
     if (correct.length > 0) {
         move(correct, false);
     }
+}
+
+function post_solution() {
+    let datos = 'initial_state=' + initial_state.join('') + '&steps=' + user_steps.join('');
+    console.log("Sending: " + datos);
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'save?' + datos, true);
+    xhr.setRequestHeader("Content-type", "application/json");
+    xhr.onreadystatechange = function () {
+        var DONE = 4; // readyState 4 means the request is done.
+        var OK = 200; // status 200 is a successful return.
+        if (xhr.readyState === DONE) {
+            if (xhr.status === OK) {
+                console.log("Response: " + xhr.responseText);
+                let resp = JSON.parse(xhr.responseText);
+                if (resp.success) {
+                    console.log("User solution saved");
+                } else {
+                    console.warn("Bot has a better solution already");
+                }
+            } else {
+                console.error("Request error");
+            }
+        }
+    };
+    xhr.send(null);
 }
