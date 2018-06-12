@@ -14,7 +14,7 @@ let user_solved = false;
 let bot_solved = false;
 
 const target = [1, 2, 3, 4, 5, 6, 7, 8, 0];
-let initial_state = [4, 1, 3, 0, 5, 7, 6, 2, 8]; // shuffle([1, 2, 3, 4, 5, 6, 7, 8, 0]);
+let initial_state = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 0]);
 let user_state = clone(initial_state);
 let user_steps = [];
 let bot_state = clone(initial_state);
@@ -52,7 +52,7 @@ function update_winner() {
 
 function new_game() {
     enable_ui(false);
-    initial_state = [4, 1, 3, 0, 5, 7, 6, 2, 8]; // shuffle([1, 2, 3, 4, 5, 6, 7, 8, 0]);
+    initial_state = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 0]);
     moves = 0;
     initial_time = 0;
     solving = false;
