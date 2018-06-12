@@ -52,6 +52,7 @@ function new_game() {
     enable_ui(false);
     initial_state = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 0]);
     game_started = false;
+    game_finished = false;
     moves = 0;
     initial_time = 0;
     end_time = 0;
@@ -125,11 +126,11 @@ addEventListener('keydown', function (ev) {
 
 function move(direction, isUser) {
     if (isUser) {
-        if (solving || user_solved) {
+        if (solving || user_solved || game_finished) {
             update_winner();
             return;
         }
-    } else if (bot_solved || game_finished) {
+    } else if (bot_solved) {
         update_winner();
         return;
     }
