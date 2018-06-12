@@ -30,7 +30,7 @@ let update_user_results = function () {
 function update_bot_results() {
     let text = document.getElementById('bot-results');
     if (bot_moves < 0 || bot_time < 0) {
-        text.innerHTML = "🤖 Robot: Not solved yet 😓";
+        text.innerHTML = "🤖 Robot: Not solved yet";
     } else {
         let time = msToTime(bot_time);
         text.innerHTML = "🤖 Robot: " + bot_moves + " movement(s) - Time: " + time;
@@ -350,6 +350,7 @@ function bot_not_solved() {
     bot_solved = false;
     enable_ui(true);
     update_bot_results();
+    alert("Sorry, our 🤖 robot could not solve this puzzle 😓")
 }
 
 function move_by_pc(sol) {
