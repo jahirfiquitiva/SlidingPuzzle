@@ -259,7 +259,9 @@ function solve_by_pc(shouldFinishGame) {
         return false;
     }
     enable_ui(false);
-    restart();
+    if (shouldFinishGame) {
+        restart();
+    }
     if (bot_path.length > 0) {
         solve_in_ui(bot_moves, bot_path, bot_time, shouldFinishGame);
     } else {
