@@ -12,6 +12,15 @@ a {
     color: #4285F4;
 }
 
+h1 {
+    margin-bottom: 1rem !important;
+}
+
+p {
+    -webkit-margin-before: .25rem;
+    -webkit-margin-after: .25rem;
+}
+
 .puzzle-base {
     height: 100%;
     width: 100%;

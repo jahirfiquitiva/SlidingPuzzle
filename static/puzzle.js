@@ -1,14 +1,73 @@
 let game_started = false;
+let game_finished = false;
+
 let moves = 0;
 let initial_time = 0;
 let end_time = 0;
 
+let bot_moves = -1;
+let bot_time = 0;
+let bot_path = [];
+
 let solving = false;
-let solved = false;
+let user_solved = false;
+let bot_solved = false;
 
 const target = [1, 2, 3, 4, 5, 6, 7, 8, 0];
 let initial_state = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 0]);
 let user_state = clone(initial_state);
+
+let update_user_results = function () {
+    if (!user_solved) {
+        let text = document.getElementById('user-results');
+        let realEnd = user_solved ? end_time : moves > 0 ? new Date().getTime() : 0;
+        let time = msToTime(realEnd - initial_time);
+        text.innerHTML = "🙋 You: " + moves + " movement(s) - Time: " + time;
+    }
+    update_winner();
+};
+
+function update_bot_results() {
+    let text = document.getElementById('bot-results');
+    if (bot_moves < 0 || bot_time < 0) {
+        text.innerHTML = "🤖 Robot: Not solved yet 😓";
+    } else {
+        let time = msToTime(bot_time);
+        text.innerHTML = "🤖 Robot: " + bot_moves + " movement(s) - Time: " + time;
+    }
+    update_winner();
+}
+
+function update_winner() {
+    let text = document.getElementById('winner');
+    text.innerHTML = "";
+    if (user_solved || bot_solved) {
+        // "🙋" : "🤖"
+        let winner = moves <= 0 ? "🤖" : moves <= bot_moves ? "🙋" : "🤖";
+        text.innerHTML = "Winner → " + winner;
+    }
+}
+
+function new_game() {
+    enable_ui(false);
+    initial_state = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 0]);
+    game_started = false;
+    moves = 0;
+    initial_time = 0;
+    end_time = 0;
+    solving = false;
+    user_solved = false;
+    bot_solved = false;
+    restart();
+    enable_ui(true);
+    update_user_results();
+    update_bot_results();
+}
+
+function restart() {
+    user_state = clone(initial_state);
+    init_puzzle();
+}
 
 function init_puzzle() {
     let user_puzzle = document.getElementById("user-puzzle");
@@ -25,14 +84,11 @@ function init_puzzle() {
         }
         tr.appendChild(td);
         if ((i + 1) % 3 === 0) {
-            // console.log(i + "Divisible por 3");
             user_puzzle.appendChild(tr);
             tr = document.createElement("tr");
         }
     })
 }
-
-new_game();
 
 addEventListener('keydown', function (ev) {
     // 87 - 38 --> Up
@@ -40,7 +96,7 @@ addEventListener('keydown', function (ev) {
     // 83 - 40 --> Down
     // 68 - 39 --> Right
 
-    if (solving || solved) {
+    if (solving || user_solved || game_finished) {
         return false;
     }
 
@@ -48,49 +104,34 @@ addEventListener('keydown', function (ev) {
     switch (key) {
         case 87:
         case 38:
-            move('up');
+            move('up', true);
             break;
         case 65:
         case 37:
-            move('le');
+            move('le', true);
             break;
         case 83:
         case 40:
-            move('do');
+            move('do', true);
             break;
         case 68:
         case 39:
-            move('ri');
+            move('ri', true);
             break;
         default:
             break;
     }
 });
 
-function restart(force) {
-    if (solved && !force) {
+function move(direction, isUser) {
+    if (isUser) {
+        if (solving || user_solved) {
+            update_winner();
+            return;
+        }
+    } else if (bot_solved || game_finished) {
+        update_winner();
         return;
-    }
-    user_state = clone(initial_state);
-    init_puzzle();
-}
-
-function new_game() {
-    enable_ui(false);
-    initial_state = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 0]);
-    game_started = false;
-    moves = 0;
-    initial_time = 0;
-    end_time = 0;
-    solving = false;
-    solved = false;
-    restart(true);
-    enable_ui(true);
-}
-
-function move(direction) {
-    if (solved) {
-        return false;
     }
 
     let space_index = index_of(user_state, 0);
@@ -165,13 +206,15 @@ function move(direction) {
         sleep(500);
     }
 
-    if (!game_started && moved) {
+    if (!game_started && moved && !solving) {
         game_started = true;
         initial_time = new Date().getTime();
+        window.setInterval(update_user_results, 100);
     }
 
-    if (moved) {
+    if (moved && !solving) {
         moves += 1;
+        update_user_results();
     }
 
     let points = 0;
@@ -182,11 +225,18 @@ function move(direction) {
     }
 
     if (points >= 9) {
-        solved = true;
+        if (isUser) {
+            user_solved = true;
+        } else {
+            bot_solved = true;
+        }
+        if (user_solved) {
+            document.getElementById('restart-btn').disabled = true;
+        }
         if (!solving) {
+            window.clearInterval(update_user_results);
             end_time = new Date().getTime();
-            alert("You solved it with " + moves + " movements in " +
-                  msToTime(end_time - initial_time));
+            update_user_results();
         }
     }
 }
@@ -212,18 +262,25 @@ function enable_ui(enable) {
     }
 }
 
-function solve_by_pc() {
-    if (solving || solved) {
+new_game();
+
+function solve_by_pc(shouldFinishGame) {
+    if (solving) {
         return false;
     }
     enable_ui(false);
-    call_py_code();
+
+    if (bot_path.length > 0) {
+        solve_in_ui(bot_moves, bot_path, bot_time, shouldFinishGame);
+    } else {
+        call_py_code(shouldFinishGame);
+    }
 }
 
-function call_py_code() {
+function call_py_code(shouldFinishGame) {
     solving = true;
     let datos = 'initial_state=' + initial_state.join('');
-    console.log("Sending: " + datos);
+    // console.log("Sending: " + datos);
 
     var xhr = new XMLHttpRequest();
     xhr.open('GET', 'solve?' + datos, true);
@@ -234,42 +291,65 @@ function call_py_code() {
         if (xhr.readyState === DONE) {
             if (xhr.status === OK) {
                 let resp = JSON.parse(xhr.responseText);
-                solve_in_ui(resp.moves, resp.steps, resp.time);
+                bot_moves = resp.moves;
+                bot_path = resp.steps;
+                bot_time = resp.time;
+                if (shouldFinishGame) {
+                    solve_in_ui(bot_moves, bot_path, bot_time, true);
+                } else {
+                    bot_solved_it(false);
+                }
             } else {
                 console.log('Error: ' + xhr.status); // An error occurred during the request.
-                pc_not_solved();
+                bot_not_solved();
             }
         }
     };
     xhr.send(null);
 }
 
-function solve_in_ui(moves, solution, time) {
-    console.log("Puzzle solved");
-    if (moves >= 0) {
-        // move_by_pc(solution[0]);
-        // move_by_pc(solution[1]);
-        for (var a = 0; a < solution.length; a++) {
-            move_by_pc(solution[a]);
-            sleep(10);
-        }
+function solve_in_ui(moves, solution, time, shouldFinishGame) {
+    // console.log("Puzzle solved");
+    if (shouldFinishGame) {
+        if (moves >= 0) {
+            for (var a = 0; a < solution.length; a++) {
+                move_by_pc(solution[a]);
+                sleep(10);
+            }
 
-        setTimeout(function () {
-            solved = true;
-            solving = false;
-            enable_ui(true);
-            alert("PC solved it with " + moves + " movements in " + msToTime(time));
-        }, 100);
+            setTimeout(function () {
+                bot_solved_it(true);
+            }, 100);
+        } else {
+            bot_not_solved();
+        }
     } else {
-        pc_not_solved();
+        bot_solved_it(false);
     }
 }
 
-function pc_not_solved() {
-    enable_ui(true);
-    solved = false;
+function bot_solved_it(shouldFinishGame) {
     solving = false;
-    alert("PC couldn't solve it! D:");
+    bot_solved = true;
+
+    enable_ui(true);
+    update_bot_results();
+
+    if (shouldFinishGame) {
+        game_finished = true;
+        window.clearInterval(update_user_results);
+        end_time = new Date().getTime();
+        update_user_results();
+    }
+
+    document.getElementById('restart-btn').disabled = shouldFinishGame || game_finished;
+}
+
+function bot_not_solved() {
+    solving = false;
+    bot_solved = false;
+    enable_ui(true);
+    update_bot_results();
 }
 
 function move_by_pc(sol) {
@@ -292,6 +372,6 @@ function move_by_pc(sol) {
             break;
     }
     if (correct.length > 0) {
-        move(correct);
+        move(correct, false);
     }
 }

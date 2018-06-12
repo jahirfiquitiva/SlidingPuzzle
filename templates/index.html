@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
         <title>Sliding Puzzle | Jahir Fiquitiva</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
-
+        <link rel="icon" href="../static/favicon.ico">
         <link href="../static/main.css" rel="stylesheet"/>
         <link href="https://fonts.googleapis.com/css?family=Rubik" rel="stylesheet">
     </head>
@@ -14,43 +14,50 @@
             <div class="puzzle-container puzzle-base">
                 <h1 class="puzzle-title">Sliding Puzzle 🔢</h1>
 
-                <br><br>
+                <div id="results" style="text-align: center; margin:auto;">
+                    <p id="user-results"></p>
+                    <p id="bot-results"></p>
+                    <p id="winner"></p>
+                </div>
+
+                <br>
 
                 <table class="puzzle" id="user-puzzle"></table>
 
-                <br><br>
+                <br>
 
                 <table class="keyboard">
                     <tr>
                         <td></td>
-                        <td class="kbd-key" onclick="move('up');">↑</td>
+                        <td class="kbd-key" onclick="move('up', true);">↑</td>
                         <td></td>
                     </tr>
                     <tr>
-                        <td class="kbd-key" onclick="move('le');">←</td>
-                        <td class="kbd-key" onclick="move('do');">↓</td>
-                        <td class="kbd-key" onclick="move('ri');">→</td>
+                        <td class="kbd-key" onclick="move('le', true);">←</td>
+                        <td class="kbd-key" onclick="move('do', true);">↓</td>
+                        <td class="kbd-key" onclick="move('ri', true);">→</td>
                     </tr>
                 </table>
 
                 <br>
-
                 <p id="wait-txt" style="text-align: center; margin:auto; display: none;">
                     Please wait…
                 </p>
-
                 <br>
 
                 <div class="btns">
-                    <button onclick="restart();">Restart</button>
+                    <button id="restart-btn" onclick="restart();">Restart</button>
                     <button onclick="new_game();">New</button>
-                    <button onclick="solve_by_pc();">Solve</button>
+                    <button class="robot-btn" onclick="solve_by_pc(true);">Solve</button>
+                    <br>
+                    <button class="robot-btn" onclick="solve_by_pc(false);">Make Robot solve it
+                    </button>
                 </div>
 
                 <br><br>
 
                 <p style="text-align: center; margin:auto;">
-                    Made by <a href="/">Jahir Fiquitiva</a>
+                    Made by <a href="https://jahirfiquitiva.com/">Jahir Fiquitiva</a>
                 </p>
 
             </div>
