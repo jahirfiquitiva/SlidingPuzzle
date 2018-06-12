@@ -14,8 +14,9 @@ let user_solved = false;
 let bot_solved = false;
 
 const target = [1, 2, 3, 4, 5, 6, 7, 8, 0];
-let initial_state = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 0]);
+let initial_state = [4, 1, 3, 0, 5, 7, 6, 2, 8]; // shuffle([1, 2, 3, 4, 5, 6, 7, 8, 0]);
 let user_state = clone(initial_state);
+let bot_state = clone(initial_state);
 
 let update_user_results = function () {
     if (!user_solved) {
@@ -29,7 +30,7 @@ let update_user_results = function () {
 
 function update_bot_results() {
     let text = document.getElementById('bot-results');
-    if (bot_moves < 0 || bot_time < 0) {
+    if (bot_moves < 0 || bot_time <= 0) {
         text.innerHTML = "🤖 Robot: Not solved yet";
     } else {
         let time = msToTime(bot_time);
@@ -50,7 +51,7 @@ function update_winner() {
 
 function new_game() {
     enable_ui(false);
-    initial_state = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 0]);
+    initial_state = [4, 1, 3, 0, 5, 7, 6, 2, 8]; // shuffle([1, 2, 3, 4, 5, 6, 7, 8, 0]);
     game_started = false;
     game_finished = false;
     moves = 0;
@@ -59,6 +60,10 @@ function new_game() {
     solving = false;
     user_solved = false;
     bot_solved = false;
+    bot_path = [];
+    bot_moves = -1;
+    bot_time = -1;
+    bot_state = clone(initial_state);
     restart();
     enable_ui(true);
     update_user_results();
@@ -67,14 +72,14 @@ function new_game() {
 
 function restart() {
     user_state = clone(initial_state);
-    init_puzzle();
+    init_puzzle(user_state);
 }
 
-function init_puzzle() {
+function init_puzzle(which) {
     let user_puzzle = document.getElementById("user-puzzle");
     user_puzzle.innerHTML = "";
     let tr = document.createElement("tr");
-    user_state.forEach(function (el, i) {
+    which.forEach(function (el, i) {
         let td = document.createElement("td");
         td.classList.add("piece");
         td.classList.add("no-select");
@@ -132,7 +137,7 @@ function move(direction, isUser) {
         }
     }
 
-    let space_index = index_of(user_state, 0);
+    let space_index = isUser ? index_of(user_state, 0) : index_of(bot_state, 0);
 
     let row = 0;
     if (space_index < 3) {
@@ -187,10 +192,17 @@ function move(direction, isUser) {
         new_index = (3 * new_row) + new_col;
     }
 
-    let old = user_state[new_index];
-    user_state[space_index] = old;
-    user_state[new_index] = 0;
-    init_puzzle();
+    if (isUser) {
+        let old = user_state[new_index];
+        user_state[space_index] = old;
+        user_state[new_index] = 0;
+    } else {
+        let old = bot_state[new_index];
+        bot_state[space_index] = old;
+        bot_state[new_index] = 0;
+    }
+
+    init_puzzle(isUser ? user_state : bot_state);
 
     if (solving) {
         sleep(500);
@@ -260,7 +272,8 @@ function solve_by_pc(shouldFinishGame) {
     }
     enable_ui(false);
     if (shouldFinishGame) {
-        restart();
+        bot_state = clone(initial_state);
+        init_puzzle(bot_state);
     }
     if (bot_path.length > 0) {
         solve_in_ui(bot_moves, bot_path, bot_time, shouldFinishGame);
@@ -286,10 +299,14 @@ function call_py_code(shouldFinishGame) {
                 bot_moves = resp.moves;
                 bot_path = resp.steps;
                 bot_time = resp.time;
-                if (shouldFinishGame) {
-                    solve_in_ui(bot_moves, bot_path, bot_time, true);
+                if (bot_moves >= 0 && bot_path.length >= 0) {
+                    if (shouldFinishGame) {
+                        solve_in_ui(bot_moves, bot_path, bot_time, true);
+                    } else {
+                        bot_solved_it(false);
+                    }
                 } else {
-                    bot_solved_it(false);
+                    bot_not_solved();
                 }
             } else {
                 console.log('Error: ' + xhr.status); // An error occurred during the request.

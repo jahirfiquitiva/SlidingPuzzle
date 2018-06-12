@@ -4,7 +4,7 @@ import time
 
 GOAL = [1, 2, 3, 4, 5, 6, 7, 8, 0]
 # GOAL = [1, 2, 3, 8, 0, 4, 7, 6, 5]
-MAX_ITERS = 8000
+MAX_ITERS = 5000
 
 UP_KEY = "w"
 DOWN_KEY = "s"
