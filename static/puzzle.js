@@ -198,7 +198,7 @@ function move(direction, isUser) {
 
     if (moved && !solving && isUser) {
         moves += 1;
-        if (!game_started) {
+        if (!game_started && !game_finished) {
             game_started = true;
             initial_time = new Date().getTime();
             window.setInterval(update_user_results, 100);
