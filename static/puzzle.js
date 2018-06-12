@@ -45,7 +45,7 @@ function update_winner() {
     text.innerHTML = "";
     if (user_solved || bot_solved) {
         // "🙋" : "🤖"
-        let winner = moves <= 0 ? "🤖" : moves <= bot_moves ? "🙋" : "🤖";
+        let winner = user_solved ? moves <= bot_moves ? "🙋" : "🤖" : "🤖";
         text.innerHTML = "Winner → " + winner;
     }
 }
