@@ -187,14 +187,6 @@ function move(direction, isUser) {
         new_index = (3 * new_row) + new_col;
     }
 
-    /*
-    console.log("Moving to " + direction);
-    console.log("Index of 0 -> " + space_index);
-    console.log("Current position: [" + row + ", " + col + "]");
-    console.log("Target position: [" + new_row + ", " + new_col + "]");
-    console.log("Target index -> " + new_index);
-    */
-
     let old = user_state[new_index];
     user_state[space_index] = old;
     user_state[new_index] = 0;
@@ -204,14 +196,13 @@ function move(direction, isUser) {
         sleep(500);
     }
 
-    if (!game_started && moved && !solving) {
-        game_started = true;
-        initial_time = new Date().getTime();
-        window.setInterval(update_user_results, 100);
-    }
-
-    if (moved && !solving) {
+    if (moved && !solving && isUser) {
         moves += 1;
+        if (!game_started) {
+            game_started = true;
+            initial_time = new Date().getTime();
+            window.setInterval(update_user_results, 100);
+        }
         update_user_results();
     }
 
@@ -223,19 +214,18 @@ function move(direction, isUser) {
     }
 
     if (points >= 9) {
-        if (isUser) {
-            user_solved = true;
-        } else {
-            bot_solved = true;
-        }
         if (user_solved) {
             document.getElementById('restart-btn').disabled = true;
         }
         if (!solving) {
             window.clearInterval(update_user_results);
             end_time = new Date().getTime();
+        }
+        if (isUser) {
+            user_solved = true;
             update_user_results();
         } else {
+            bot_solved = true;
             update_bot_results();
         }
     }
