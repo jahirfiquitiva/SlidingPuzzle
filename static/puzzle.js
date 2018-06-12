@@ -130,9 +130,6 @@ function move(direction, isUser) {
             update_winner();
             return;
         }
-    } else if (bot_solved) {
-        update_winner();
-        return;
     }
 
     let space_index = index_of(user_state, 0);
@@ -238,6 +235,8 @@ function move(direction, isUser) {
             window.clearInterval(update_user_results);
             end_time = new Date().getTime();
             update_user_results();
+        } else {
+            update_bot_results();
         }
     }
 }
