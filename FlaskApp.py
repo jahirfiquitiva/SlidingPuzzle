@@ -7,15 +7,33 @@ SOLUTION_FILE = 'solutions.jff'
 
 
 # noinspection PyBroadException
-def get_solution_from_file(expected, file):
+def get_all_solutions_in_file():
+    try:
+        file = open(SOLUTION_FILE, 'r')
+    except IOError:
+        file = open(SOLUTION_FILE, 'w')
+
+    dictio = {}
+    try:
+        file = open(SOLUTION_FILE, 'r')
+        for line in file:
+            (key, val) = line.replace('\n', '').replace('\r', '').split('=')
+            dictio[key] = val
+        file.close()
+    except Exception:
+        pass
+    return dictio
+
+
+# noinspection PyBroadException
+def get_solution_from_file(expected):
     solution = []
     try:
-        lines = [line.rstrip('\n') for line in file]
-        for line in lines:
-            if line.startswith(expected):
-                print('Found solution!')
-                solution = [char for char in line.split("=")[1]]
-                break
+        solutions = get_all_solutions_in_file()
+        if expected in solutions:
+            print('Solution found')
+            solution = [char for char in solutions[expected]]
+            print(solution)
     except Exception:
         solution = []
         pass
@@ -23,11 +41,22 @@ def get_solution_from_file(expected, file):
 
 
 # noinspection PyBroadException
-def save_solution_in_file(state, path, file):
+def save_solution_in_file(state, path):
+    try:
+        file = open(SOLUTION_FILE, 'r')
+    except IOError:
+        file = open(SOLUTION_FILE, 'w')
+
     try:
         solution = ''.join(str(n) for n in path)
-        print("Saving solution in file: " + state + "=" + solution)
-        file.write(state + "=" + solution + "\n")
+        solutions = get_all_solutions_in_file()
+
+        solutions[state] = solution
+
+        file = open(SOLUTION_FILE, 'w')
+        for (st, sol) in solutions.items():
+            file.write(st + "=" + sol + "\n")
+        file.close()
         return True
     except Exception:
         return False
@@ -49,19 +78,12 @@ def solve():
         for char in state_string:
             state_array.append(int(char))
 
-        try:
-            file = open(SOLUTION_FILE, 'r')
-        except IOError:
-            file = open(SOLUTION_FILE, 'w')
-        file = open(SOLUTION_FILE, 'r')
-
-        solution = get_solution_from_file(state_string, file)
+        solution = get_solution_from_file(state_string)
 
         if solution is None or len(solution) <= 0:
             initial_state = pst.State(state_array)
             moves, time, path, steps = initial_state.solve(print_states=True)
-            file = open(SOLUTION_FILE, 'a')
-            save_solution_in_file(state_string, steps, file)
+            save_solution_in_file(state_string, steps)
         else:
             moves = len(solution)
             time = 250
@@ -86,18 +108,11 @@ def save():
         for char in steps_arg:
             steps.append(str(char))
 
-        try:
-            file = open(SOLUTION_FILE, 'r')
-        except IOError:
-            file = open(SOLUTION_FILE, 'w')
-        file = open(SOLUTION_FILE, 'r')
-
-        solution = get_solution_from_file(state_string, file)
+        solution = get_solution_from_file(state_string)
 
         saved = False
         if solution is None or len(solution) <= 0 or len(steps) < len(solution):
-            file = open(SOLUTION_FILE, 'a')
-            saved = save_solution_in_file(state_string, steps, file)
+            saved = save_solution_in_file(state_string, steps)
 
         return jsonify(success=saved)
     except Exception:
