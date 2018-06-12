@@ -6,7 +6,7 @@ let initial_time = 0;
 let end_time = 0;
 
 let bot_moves = -1;
-let bot_time = 0;
+let bot_time = -1;
 let bot_path = [];
 
 let solving = false;
@@ -45,7 +45,13 @@ function update_winner() {
     text.innerHTML = "";
     if (user_solved || bot_solved) {
         // "🙋" : "🤖"
-        let winner = user_solved ? moves <= bot_moves ? "🙋" : "🤖" : "🤖";
+        let winner = user_solved ? (moves <= bot_moves || bot_moves < 0) ? "🙋" : "🤖" : "🤖";
+        if (user_solved && moves === bot_moves) {
+            let btns = document.getElementsByClassName('robot-btn');
+            for (let a = 0; a < btns.length; a++) {
+                btns[a].disabled = true;
+            }
+        }
         text.innerHTML = "Winner → " + winner;
     }
 }
@@ -299,13 +305,13 @@ function solve_by_pc(shouldFinishGame) {
     if (bot_path.length > 0) {
         solve_in_ui(bot_moves, bot_path, bot_time, shouldFinishGame);
     } else {
-        call_py_code(shouldFinishGame);
+        call_py_code(shouldFinishGame, user_solved);
     }
 }
 
-function call_py_code(shouldFinishGame) {
+function call_py_code(shouldFinishGame, force) {
     solving = true;
-    let datos = 'initial_state=' + initial_state.join('');
+    let datos = 'initial_state=' + initial_state.join('') + '&force=' + force.toString();
     // console.log("Sending: " + datos);
 
     var xhr = new XMLHttpRequest();
@@ -327,6 +333,9 @@ function call_py_code(shouldFinishGame) {
                         bot_solved_it(false);
                     }
                 } else {
+                    bot_moves = -1;
+                    bot_path = [];
+                    bot_time = -1;
                     bot_not_solved();
                 }
             } else {

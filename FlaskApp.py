@@ -51,7 +51,9 @@ def save_solution_in_file(state, path):
         solution = ''.join(str(n) for n in path)
         solutions = get_all_solutions_in_file()
 
-        solutions[state] = solution
+        old_solution = solutions[state]
+        if len(solution) <= len(old_solution):
+            solutions[state] = solution
 
         file = open(SOLUTION_FILE, 'w')
         for (st, sol) in solutions.items():
@@ -74,13 +76,15 @@ def solve():
         state_string = str(request.args.get('initial_state')) \
             .replace('[', '').replace(']', '').replace("'", '')
 
+        force = 'true' in str(request.args.get('force'))
+
         state_array = []
         for char in state_string:
             state_array.append(int(char))
 
         solution = get_solution_from_file(state_string)
 
-        if solution is None or len(solution) <= 0:
+        if force or solution is None or len(solution) <= 0:
             initial_state = pst.State(state_array)
             moves, time, path, steps = initial_state.solve(print_states=True)
             save_solution_in_file(state_string, steps)
