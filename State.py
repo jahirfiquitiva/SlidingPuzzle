@@ -21,6 +21,9 @@ class Queue:
     def __init__(self):
         self.pq = []
 
+    def append(self, item):
+        self.add(item)
+
     def add(self, item):
         heappush(self.pq, item)
 
@@ -48,6 +51,7 @@ class State(object):
         self.steps = []
         self.parent = None
         self.depth = 0
+        self.mvmnt = ''
         val = 0
         mat = []
         for i in range(0, 3):
@@ -167,6 +171,7 @@ class State(object):
             new_steps.append(UP_KEY)
             clon.steps = new_steps
 
+            clon.mvmnt = UP_KEY
             clon.parent = self
             clon.depth = self.depth + 1
             moved = True
@@ -190,6 +195,7 @@ class State(object):
             new_steps.append(DOWN_KEY)
             clon.steps = new_steps
 
+            clon.mvmnt = DOWN_KEY
             clon.parent = self
             clon.depth = self.depth + 1
             moved = True
@@ -213,6 +219,7 @@ class State(object):
             new_steps.append(LEFT_KEY)
             clon.steps = new_steps
 
+            clon.mvmnt = LEFT_KEY
             clon.parent = self
             clon.depth = self.depth + 1
             moved = True
@@ -236,6 +243,7 @@ class State(object):
             new_steps.append(RIGHT_KEY)
             clon.steps = new_steps
 
+            clon.mvmnt = RIGHT_KEY
             clon.parent = self
             clon.depth = self.depth + 1
             moved = True
@@ -266,53 +274,126 @@ class State(object):
             path.append(self)
             return self.parent.create_solution_tree(path)
 
-    def solve(self, print_states=False, fun=None):
+    def _a_star(self, max_duration=120):
         openset = Queue()
         openset.add(self.clone())
         closedset = []
-        moves = 0
-        iters = 0
-        print("Solving...")
-        print(openset.peek(), "\n")
         start = time.time()
-        end = 0
-        solved_path = []
-        steps = []
+
         while openset:
+            end = time.time()
+            if float(end - start) > max_duration or len(openset) <= 0:
+                return None, -1
+
             current = openset.pop()
-            if iters >= MAX_ITERS:
-                moves = -1
-                break
-            if iters % 1000 == 0:
-                print("Iteration #" + str(iters))
             if current.is_solved():
+                moves = []
+                temp = current
+                while True:
+                    moves.insert(0, temp.mvmnt)
+                    if temp.depth <= 1:
+                        break
+                    temp = temp.parent
                 end = time.time()
-                path = current.create_solution_tree([])
-                for state in reversed(path):
-                    solved_path.append(state.clone().to_array())
-                    if fun is not None:
-                        fun(state.to_array())
-                    if print_states:
-                        print(state)
-                        print()
-                moves = len(path)
-                last = path.pop(0)
-                steps = last.steps
-                if print_states:
-                    print("Solution found after %d iterations :D !" % iters)
-                    print(str(len(last.steps)) + " steps: " + str(last.steps))
-                    print("Solution found in %.5f seconds" % float(end - start))
-                break
+                return moves, float(end - start)
             new_moves = current.get_possible_movements()
-            if len(new_moves) > 0:
-                iters += 1
-                for state in new_moves:
-                    if state not in closedset:
-                        openset.add(state)
+            for state in new_moves:
+                if state not in closedset:
+                    openset.add(state)
             closedset.append(current)
+        return None, -1
+
+    def _bfs(self, max_duration=120):
+        start = time.time()
+        nodes = [self.clone()]
+        while nodes:
+            end = time.time()
+            if float(end - start) > max_duration or len(nodes) <= 0:
+                return None, -1
+
+            node = nodes.pop(0)
+            if node.is_solved():
+                moves = []
+                temp = node
+                while True:
+                    moves.insert(0, temp.mvmnt)
+                    if temp.depth <= 1:
+                        break
+                    temp = temp.parent
+                end = time.time()
+                return moves, float(end - start)
+
+            nodes.extend(node.get_possible_movements())
+        return None, -1
+
+    def _dfs(self, max_depth=20, max_duration=120):
+        start = time.time()
+        nodes = [self.clone()]
+        while nodes:
+            end = time.time()
+            if float(end - start) > max_duration or len(nodes) <= 0:
+                return None, -1
+
+            node = nodes.pop(0)
+            if node.is_solved():
+                moves = []
+                temp = node
+                while True:
+                    moves.insert(0, temp.mvmnt)
+                    if temp.depth <= 1:
+                        break
+                    temp = temp.parent
+                end = time.time()
+                return moves, float(end - start)
+            # Add all the expansions to the beginning of the stack if we are under the depth limit
+            if node.depth < max_depth:
+                new_nodes = node.get_possible_movements()
+                new_nodes.extend(nodes)
+                nodes = new_nodes
+        return None, -1
+
+    def _ids(self, max_depth=10, max_duration=120):
+        start = time.time()
+        for i in range(max_depth):
+            end = time.time()
+            if float(end - start) > max_duration:
+                return None, -1
+            result, total = self._dfs(max_depth=i, max_duration=max_duration)
+            if result is not None:
+                return result, total
+        return None, -1
+
+    def optimal_solution(self, max_duration=30, include_ids=False):
+        print("Attempting to solve:")
+        print(str(self))
+        print("... ...")
+
+        algo = "A*"
+
+        print("Attempting to use %s algorithm" % algo)
+        path, total = self._a_star(max_duration=max_duration)
+        if path is None or len(path) <= 0:
+            algo = "Breadth First Search"
+            print("Attempting to use %s algorithm" % algo)
+            path, total = self._bfs(max_duration=max_duration - 5)
+        if path is None or len(path) <= 0:
+            algo = "Depth First Search"
+            print("Attempting to use %s algorithm" % algo)
+            path, total = self._dfs(max_duration=max_duration - 5)
+        if path is None or len(path) <= 0:
+            if include_ids:
+                algo = "Iterative Depth First Search"
+                print("Attempting to use %s algorithm" % algo)
+                path, total = self._ids(max_duration=max_duration)
+        if path is None or len(path) <= 0:
+            algo = "None"
+            path = []
+            total = -1
+
+        if path is not None and len(path) > 0 and total >= 0:
+            print("Solution found using %s algorithm in %d movement(s) and %.3f seconds" % (
+                algo, len(path), total))
+            print("Steps: " + str(path))
         else:
-            print("Solution not found :'c")
-            moves = -1
-        if moves <= 0:
-            print("Sorry, I couldn't solve this puzzle :'c")
-        return moves, (float(end - start) * 1000), solved_path, steps
+            print("Solution not found")
+        return path, total

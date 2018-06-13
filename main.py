@@ -70,16 +70,10 @@ def play_game(initial_values, pc_moves, pc_time):
 
 
 def main():
-    # initial_values = [4, 1, 3, 0, 5, 7, 6, 2, 8]
-    # initial_values = list(range(9))
-    initial_values = [4, 1, 3, 0, 5, 7, 6, 2, 8]
-    # shuffle(initial_values)
+    initial_values = list(range(9))
+    shuffle(initial_values)
     initial_state = pst.State(initial_values)
-    print()
-    moves, time, path, steps = initial_state.solve(print_states=True)
-    print(path)
-    print("Let's play the game!")
-    # play_game(initial_values, moves, time)
+    initial_state.optimal_solution()
 
 
 if __name__ == '__main__':

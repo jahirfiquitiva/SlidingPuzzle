@@ -1,6 +1,7 @@
 import State as pst
-import socket
 from flask import Flask, render_template, request, jsonify
+
+# import socket
 
 app = Flask("Sliding Puzzle")
 SOLUTION_FILE = 'solutions.jff'
@@ -90,18 +91,19 @@ def solve():
 
         if force or solution is None or len(solution) <= 0:
             initial_state = pst.State(state_array)
-            moves, time, path, steps = initial_state.solve(print_states=True)
-            if moves > 0 and len(steps) > 0:
-                save_solution_in_file(state_string, steps)
+            path, time = initial_state.optimal_solution()
+            if path is None or len(path) <= 0:
+                path = []
+                time = 0
+            else:
+                save_solution_in_file(state_string, path)
         else:
-            moves = len(solution)
-            time = 250
             path = []
-            steps = solution
+            time = 0.25
 
-        return jsonify(moves=moves, time=time, path=path, steps=steps, error=False)
+        return jsonify(moves=len(path), time=(time * 1000), steps=path, error=False)
     except Exception:
-        return jsonify(moves=-1, time=-1, path=[], steps=[], error=True)
+        return jsonify(moves=-1, time=-1, steps=[], error=True)
 
 
 # noinspection PyBroadException
