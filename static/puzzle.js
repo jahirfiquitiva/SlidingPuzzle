@@ -44,8 +44,9 @@ function update_winner() {
     let text = document.getElementById('winner');
     text.innerHTML = "";
     if (user_solved || bot_solved) {
-        // "🙋" : "🤖"
-        let winner = user_solved ? (moves <= bot_moves || bot_moves < 0) ? "🙋" : "🤖" : "🤖";
+        let you = "🙋 You!";
+        let bot = "🤖 Robot!";
+        let winner = user_solved ? (moves <= bot_moves || bot_moves < 0) ? you : bot : bot;
         if (user_solved && moves === bot_moves) {
             let btns = document.getElementsByClassName('robot-btn');
             for (let a = 0; a < btns.length; a++) {
