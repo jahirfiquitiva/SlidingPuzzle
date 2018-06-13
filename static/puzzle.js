@@ -1,3 +1,7 @@
+const target = [1, 2, 3, 4, 5, 6, 7, 8, 0];
+const test = [4, 0, 2, 5, 7, 3, 8, 1, 6];
+const debug = false;
+
 let game_started = false;
 let game_finished = false;
 
@@ -13,8 +17,7 @@ let solving = false;
 let user_solved = false;
 let bot_solved = false;
 
-const target = [1, 2, 3, 4, 5, 6, 7, 8, 0];
-let initial_state = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 0]);
+let initial_state = debug ? clone(test) : shuffle([1, 2, 3, 4, 5, 6, 7, 8, 0]);
 let user_state = clone(initial_state);
 let user_steps = [];
 let bot_state = clone(initial_state);
@@ -59,7 +62,7 @@ function update_winner() {
 
 function new_game() {
     enable_ui(false);
-    initial_state = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 0]);
+    initial_state = debug ? clone(test) : shuffle([1, 2, 3, 4, 5, 6, 7, 8, 0]);
     moves = 0;
     initial_time = 0;
     solving = false;
@@ -429,7 +432,6 @@ function post_solution() {
         var OK = 200; // status 200 is a successful return.
         if (xhr.readyState === DONE) {
             if (xhr.status === OK) {
-                console.log("Response: " + xhr.responseText);
                 let resp = JSON.parse(xhr.responseText);
                 if (resp.success) {
                     console.log("User solution saved");

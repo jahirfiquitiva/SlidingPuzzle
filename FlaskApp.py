@@ -51,9 +51,13 @@ def save_solution_in_file(state, path):
         solution = ''.join(str(n) for n in path)
         solutions = get_all_solutions_in_file()
 
-        old_solution = solutions[state]
-        if len(solution) <= len(old_solution):
-            solutions[state] = solution
+        old_solution = None
+        if state in solutions:
+            old_solution = solutions[state]
+
+        if old_solution is None or len(old_solution) <= 0 or len(solution) <= len(old_solution):
+            if len(solution) > 0:
+                solutions[state] = solution
 
         file = open(SOLUTION_FILE, 'w')
         for (st, sol) in solutions.items():
@@ -87,16 +91,17 @@ def solve():
         if force or solution is None or len(solution) <= 0:
             initial_state = pst.State(state_array)
             moves, time, path, steps = initial_state.solve(print_states=True)
-            save_solution_in_file(state_string, steps)
+            if moves > 0 and len(steps) > 0:
+                save_solution_in_file(state_string, steps)
         else:
             moves = len(solution)
             time = 250
             path = []
             steps = solution
 
-        return jsonify(moves=moves, time=time, path=path, steps=steps)
+        return jsonify(moves=moves, time=time, path=path, steps=steps, error=False)
     except Exception:
-        return jsonify(moves=-1, time=-1, path=[], steps=[])
+        return jsonify(moves=-1, time=-1, path=[], steps=[], error=True)
 
 
 # noinspection PyBroadException
@@ -118,9 +123,9 @@ def save():
         if solution is None or len(solution) <= 0 or len(steps) < len(solution):
             saved = save_solution_in_file(state_string, steps)
 
-        return jsonify(success=saved)
+        return jsonify(success=saved, error=False)
     except Exception:
-        return jsonify(success=False)
+        return jsonify(success=False, error=True)
 
 
 if __name__ == "__main__":
