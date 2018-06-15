@@ -216,10 +216,6 @@ function move(direction, isUser) {
 
     init_puzzle(isUser ? user_state : bot_state);
 
-    if (solving) {
-        sleep(500);
-    }
-
     if (moved && !solving && isUser) {
         let right_step = '';
         switch (direction) {
@@ -355,7 +351,7 @@ function solve_in_ui(moves, solution, time, shouldFinishGame) {
     // console.log("Puzzle solved");
     if (shouldFinishGame) {
         if (moves >= 0) {
-            for (var a = 0; a < solution.length; a++) {
+            for (let a = 0; a < solution.length; a++) {
                 move_by_pc(solution[a]);
                 sleep(10);
             }

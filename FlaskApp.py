@@ -98,10 +98,13 @@ def solve():
             else:
                 save_solution_in_file(state_string, path)
         else:
-            path = []
+            path = solution
             time = 0.25
 
-        return jsonify(moves=len(path), time=(time * 1000), steps=path, error=False)
+        right_len = -1 if path is None or len(path) <= 0 else len(path)
+        right_time = -1 if path is None or len(path) <= 0 else (time * 1000)
+
+        return jsonify(moves=right_len, time=right_time, steps=path, error=False)
     except Exception:
         return jsonify(moves=-1, time=-1, steps=[], error=True)
 
