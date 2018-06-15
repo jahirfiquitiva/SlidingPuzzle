@@ -418,7 +418,7 @@ function move_by_pc(sol) {
 
 function post_solution() {
     let datos = 'initial_state=' + initial_state.join('') + '&steps=' + user_steps.join('');
-    console.log("Sending: " + datos);
+    // console.log("Sending: " + datos);
 
     var xhr = new XMLHttpRequest();
     xhr.open('POST', 'save?' + datos, true);
@@ -435,7 +435,7 @@ function post_solution() {
                     console.warn("Bot has a better solution already");
                 }
             } else {
-                console.error("Request error");
+                console.log('Error saving solution: ' + xhr.status); // An error occurred during the request.
             }
         }
     };
