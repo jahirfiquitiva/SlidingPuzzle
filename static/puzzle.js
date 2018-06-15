@@ -113,6 +113,7 @@ addEventListener('keydown', function (ev) {
     // 65 - 37 --> Left
     // 83 - 40 --> Down
     // 68 - 39 --> Right
+    ev.preventDefault();
 
     if (solving || user_solved || game_finished) {
         return false;
