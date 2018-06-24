@@ -1,3 +1,5 @@
+import itertools
+
 import State as pst
 from random import shuffle
 import os
@@ -74,6 +76,18 @@ def main():
     shuffle(initial_values)
     initial_state = pst.State(initial_values)
     initial_state.optimal_solution()
+    # combos = itertools.permutations(initial_values, 9)
+    # i = 0
+    # solved = 0
+    # for combo in combos:
+    # print("Combo #%d -> %s" % (i, str(combo)))
+        #initial_state = pst.State(list(combo))
+        #path, total = initial_state.optimal_solution(use_all=False)
+        #if path is not None and len(path) > 0 and total >= 0:
+         #   solved += 1
+    # i += 1
+# print("Solved %d cases out of %d" % (solved, i))
+    # print("%d total combos" % len(combos))
 
 
 if __name__ == '__main__':

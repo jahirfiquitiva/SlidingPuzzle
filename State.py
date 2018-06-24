@@ -363,7 +363,7 @@ class State(object):
                 return result, total
         return None, -1
 
-    def optimal_solution(self, max_duration=30, include_ids=False):
+    def optimal_solution(self, max_duration=30, include_ids=False, use_all=False):
         print("Attempting to solve:")
         print(str(self))
         print("... ...")
@@ -371,20 +371,23 @@ class State(object):
         algo = "A*"
 
         print("Attempting to use %s algorithm" % algo)
-        path, total = self._a_star(max_duration=max_duration)
-        if path is None or len(path) <= 0:
-            algo = "Breadth First Search"
-            print("Attempting to use %s algorithm" % algo)
-            path, total = self._bfs(max_duration=max_duration - 5)
-        if path is None or len(path) <= 0:
-            algo = "Depth First Search"
-            print("Attempting to use %s algorithm" % algo)
-            path, total = self._dfs(max_duration=max_duration - 5)
-        if path is None or len(path) <= 0:
-            if include_ids:
-                algo = "Iterative Depth First Search"
+        path, total = self._a_star(max_duration=max_duration * (1 if use_all else 1.5))
+
+        if use_all:
+            if path is None or len(path) <= 0:
+                algo = "Breadth First Search"
                 print("Attempting to use %s algorithm" % algo)
-                path, total = self._ids(max_duration=max_duration)
+                path, total = self._bfs(max_duration=max_duration - 5)
+            if path is None or len(path) <= 0:
+                algo = "Depth First Search"
+                print("Attempting to use %s algorithm" % algo)
+                path, total = self._dfs(max_duration=max_duration - 5)
+            if path is None or len(path) <= 0:
+                if include_ids:
+                    algo = "Iterative Depth First Search"
+                    print("Attempting to use %s algorithm" % algo)
+                    path, total = self._ids(max_duration=max_duration)
+
         if path is None or len(path) <= 0:
             algo = "None"
             path = []
